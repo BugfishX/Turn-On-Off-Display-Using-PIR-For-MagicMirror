@@ -28,17 +28,17 @@ p1 = Process(target=start_MM)
 p1.start()
 
 while True:
-    input=GPIO.input(23)
+    input=GPIO.input(PIR_Sensor)
 
 #set time.sleep for how long display stays on/off at least
 #no motion so display turns off
     if input==0:
-        print ("Not Sensing Motion", input, time.strftime("%d.%m.%Y %H:%M:%S"))
+        print ("Not Sensing Motion", time.strftime("%d.%m.%Y %H:%M:%S"))
         os.system(display_power_off)
         time.sleep(1.0)
 #motion detected so display turns on
 
     elif input==1:              
-        print ("Motion Detected", input, time.strftime("%d.%m.%Y %H:%M:%S"))
+        print ("Motion Detected", time.strftime("%d.%m.%Y %H:%M:%S"))
         os.system(display_power_on)
         time.sleep(30.0)
