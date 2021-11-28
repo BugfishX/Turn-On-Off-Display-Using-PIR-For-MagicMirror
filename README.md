@@ -27,9 +27,11 @@ import os
 from multiprocessing import Process
 
 #def var
-PIR_Sensor = 23
+PIR_Sensor = 4
 display_power_on= "vcgencmd display_power 1"
 display_power_off= "vcgencmd display_power 0"
+count_motion = 0
+count_nomotion = 0
 
 #set GPIOs to GPIO-Number
 GPIO.setmode(GPIO.BCM)
@@ -40,10 +42,9 @@ GPIO.setup(PIR_Sensor, GPIO.IN)
 
 #function to start MM
 def start_MM ():
-    print ">> START MAGIC MIRROR <<"
+    print (">> START MAGIC MIRROR <<")
     start_mm = "cd MagicMirror; npm run start"
     os.system(start_mm)
-    print ">> MAGIC MIRROR STARTED <<"
     
 #MAIN until abort with Ctrl + C
 p1 = Process(target=start_MM)
@@ -51,25 +52,30 @@ p1.start()
 
 while True:
     input=GPIO.input(PIR_Sensor)
+    time.sleep(0.2) #checking interval
 
-#set time.sleep for how long display stays on/off at least
 #no motion so display turns off
     if input==0:
-        print ("Not Sensing Motion", time.strftime("%d.%m.%Y %H:%M:%S"))
-        os.system(display_power_off)
-        time.sleep(1.0)
-#motion detected so display turns on
+        print ("Not Sensing Motion ", count_nomotion, "x -", time.strftime("%d.%m.%Y %H:%M:%S"))
+        count_nomotion+=1
+        if count_nomotion>=3:
+            os.system(display_power_off)
+            count_motion=0
 
+#motion detected so display turns on
     elif input==1:              
-        print ("Motion Detected", time.strftime("%d.%m.%Y %H:%M:%S"))
-        os.system(display_power_on)
-        time.sleep(30.0)
+        print ("Motion Detected ", count_motion, "x -", time.strftime("%d.%m.%Y %H:%M:%S"))
+        count_motion+=1
+        if count_motion >=10:
+            os.system(display_power_on)
+            count_nomotion=0
+            time.sleep(60.0) #how long display stays on at least
   ```
      
  ## Configuration
  | Option  | Description |
 |----------|----------|
-| PIR_Sensor  | The GPIO you will use (example: GPIO 23 is Pin 16 on RPi 3)  |
+| PIR_Sensor  | The GPIO you will use  |
 | time.sleep()  | Works as a timer. There are two "time.sleep()"s. One is for time waiting until display turns on  and the other until display turns off   |
    
 <br><br><br>
